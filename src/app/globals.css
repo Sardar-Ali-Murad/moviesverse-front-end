@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@300;400&family=Tilt+Neon&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -17,11 +18,13 @@
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+  font-family: "Tilt Neon", sans-serif !important;
+}
+
+.fancy {
+  font-family: "Tilt Neon", sans-serif !important;
+}
+
+svg {
+  margin-left: 8px !important;
 }

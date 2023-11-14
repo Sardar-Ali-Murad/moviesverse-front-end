@@ -1,113 +1,131 @@
-import Image from 'next/image'
+"use client";
+import React from "react";
+import Movies from "@/components/home/movies";
+import axios from "axios";
+import Header from "@/components/common/Header";
+import ClipLoader from "react-spinners/ClipLoader";
+import ResponsivePagination from "react-responsive-pagination";
+import "react-responsive-pagination/themes/bootstrap.css";
+import Footer from "@/components/common/Footer";
+import Head from "next/head";
 
-export default function Home() {
+const page = () => {
+  let [movies, setMovies] = React.useState([]);
+  let [totalPages, setTotalPages] = React.useState(1);
+  let [loading, setLoading] = React.useState(false);
+  const [currentPage, setCurrentPage] = React.useState(1);
+  let [searchInput, setSearchInput] = React.useState("");
+  let [webUrl, setURL] = React.useState(
+    "https://moviesverse1.p.rapidapi.com/movies"
+  );
+
+  React.useEffect(() => {
+    const getMovies = async () => {
+      setLoading(true);
+      const options = {
+        method: "GET",
+        url: `${webUrl}/${currentPage}`,
+        headers: {
+          "X-RapidAPI-Key":
+            "f78c0b8604mshfc42227a084fcafp12de63jsnd5bbc1a8c81f",
+          "X-RapidAPI-Host": "moviesverse1.p.rapidapi.com",
+        },
+      };
+      try {
+        const { data } = await axios.request(options);
+        setMovies(data?.movies);
+        setTotalPages(data?.totalPages);
+        setLoading(false);
+      } catch (error) {
+        setLoading(false);
+        console.error(error);
+      }
+    };
+    getMovies();
+  }, [webUrl, currentPage]);
+
+  React.useEffect(() => {
+    if (totalPages === 0) {
+      setTotalPages(1);
+    }
+  }, [totalPages]);
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/app/page.js</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
-
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
+    <>
+      <Head>
+        <title>Movies Verse - Home</title>
+        <link rel="icon" href="/favicon.ico" />
+        <meta
+          name="description"
+          content="Find and download your favorite movies. Search by category, genre, year, and streaming platforms like Netflix and Amazon Prime."
         />
+        <meta
+          name="keywords"
+          content="movies, download movies, streaming, Netflix, Amazon Prime, genres, categories, years"
+        />
+        <meta name="author" content="Sardar Ali Murad" />
+        <meta property="og:title" content={`Movies Verse -  Home`} />
+        <meta
+          property="og:description"
+          content="Find and download your favorite movies. Search by category, genre, year, and streaming platforms like Netflix and Amazon Prime."
+        />
+        <meta property="og:type" content="website" />
+        <meta
+          property="og:image"
+          content="https://moviesverse.com/og-image.jpg"
+        />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta
+          name="twitter:description"
+          content="Find and download your favorite movies. Search by category, genre, year, and streaming platforms like Netflix and Amazon Prime."
+        />
+      </Head>
+      <div className="bg-primary min-h-[100vh] pb-[10px]">
+        <Header
+          setURL={setURL}
+          setSearchInput={setSearchInput}
+          searchInput={searchInput}
+          setMovies={setMovies}
+          setTotalPages={setTotalPages}
+          setLoading={setLoading}
+          setCurrentPage={setCurrentPage}
+          currentPage={currentPage}
+        />
+        <div className="px-[30px] md:px-[50px] lg:px-[100px]">
+          {loading ? (
+            <div className="mt-[100px]">
+              <ClipLoader
+                color="#fff"
+                loading={loading}
+                size={100}
+                aria-label="Loading Spinner"
+                data-testid="loader"
+              />
+            </div>
+          ) : (
+            <div>
+              {movies.length === 0 && (
+                <p className="text-[20px] font-bold mt-[30px] text-[#fff]">
+                  No movies to show by this filter!
+                </p>
+              )}
+              <Movies array={movies} />
+              <div className="py-[30px] w-[200px] md:w-[300px] lg:w-[300px]">
+                <ResponsivePagination
+                  current={currentPage}
+                  total={totalPages}
+                  onPageChange={setCurrentPage}
+                  className="fancy flex flex-row gap-[10px] w-[300px]"
+                  pageItemClassName="bg-[#fff] px-[10px] py-[5px] rounded"
+                  activeItemClassName="bg-[#353935]   border-dotted border-2 border-indigo-600"
+                />
+              </div>
+            </div>
+          )}
+        </div>
+        <Footer />
       </div>
+    </>
+  );
+};
 
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800 hover:dark:bg-opacity-30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore starter templates for Next.js.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  )
-}
+export default page;
